@@ -1,7 +1,7 @@
 #include <sdk.hpp>
 #include <Server/Components/Vehicles/vehicles.hpp>
 
-struct BasicComponent final : IComponent, PoolEventHandler<IVehicle>
+struct BasicTemplate final : IComponent, PoolEventHandler<IVehicle>
 {
 private:
 	ICore* core_ = nullptr;
@@ -13,7 +13,7 @@ public:
 
 	StringView componentName() const override
 	{
-		return "Basic component";
+		return "Basic Template";
 	}
 
 	SemanticVersion componentVersion() const override
@@ -76,7 +76,7 @@ public:
 		}
 	}
 
-	~BasicComponent()
+	~BasicTemplate()
 	{
 		// Clean up what you did above.
 		if (vehicles)
@@ -99,5 +99,5 @@ public:
 
 COMPONENT_ENTRY_POINT()
 {
-	return new BasicComponent();
+	return new BasicTemplate();
 }
