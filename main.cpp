@@ -1,30 +1,36 @@
 #include <sdk.hpp>
 #include <Server/Components/Vehicles/vehicles.hpp>
 
-struct CountVehiclesInRulesComponent final : IComponent, PoolEventHandler<IVehicle>
+struct BasicComponent final : IComponent, PoolEventHandler<IVehicle>
 {
-	PROVIDE_UID(0x88f9172cc6eb78a3);
+private:
+	ICore* core_ = nullptr;
+	IVehiclesComponent* vehicles = nullptr;
+
+public:
+	// https://open.mp/uid
+	PROVIDE_UID(/* UID GOES HERE */);
 
 	StringView componentName() const override
 	{
-		return "Count vehicles in rules";
+		return "Basic component";
 	}
 
 	SemanticVersion componentVersion() const override
 	{
-		return SemanticVersion(0, 0, 0, 0);
+		return SemanticVersion(0, 0, 1, 0);
 	}
 
 	void onLoad(ICore* c) override
 	{
 		// Cache core, player pool here
-		core = c;
-		c->printLn("on load");
+		core_ = c;
+		c->printLn("Basic component template loaded.");
 	}
 
 	void onInit(IComponentList* components) override
 	{
-		// Cache components, add event handlers here
+		// Cache components, add event handlers here.
 		vehicles = components->queryComponent<IVehiclesComponent>();
 		if (vehicles)
 		{
@@ -34,12 +40,12 @@ struct CountVehiclesInRulesComponent final : IComponent, PoolEventHandler<IVehic
 
 	void onReady() override
 	{
-		// Fire events here at earliest
+		// Fire events here at earliest.
 	}
 
 	void onPoolEntryCreated(IVehicle& entry) override
 	{
-		for (INetwork* network : core->getNetworks())
+		for (INetwork* network : core_->getNetworks())
 		{
 			INetworkQueryExtension* query = queryExtension<INetworkQueryExtension>(network);
 			if (query)
@@ -51,7 +57,7 @@ struct CountVehiclesInRulesComponent final : IComponent, PoolEventHandler<IVehic
 
 	void onPoolEntryDestroyed(IVehicle& entry) override
 	{
-		for (INetwork* network : core->getNetworks())
+		for (INetwork* network : core_->getNetworks())
 		{
 			INetworkQueryExtension* query = queryExtension<INetworkQueryExtension>(network);
 			if (query)
@@ -63,16 +69,16 @@ struct CountVehiclesInRulesComponent final : IComponent, PoolEventHandler<IVehic
 
 	void onFree(IComponent* component) override
 	{
-		// Invalidate vehicles pointer so it can't be used past this point
+		// Invalidate vehicles pointer so it can't be used past this point.
 		if (component == vehicles)
 		{
 			vehicles = nullptr;
 		}
 	}
 
-	~CountVehiclesInRulesComponent()
+	~BasicComponent()
 	{
-		// Clean up what you did above
+		// Clean up what you did above.
 		if (vehicles)
 		{
 			vehicles->getPoolEventDispatcher().removeEventHandler(this);
@@ -81,14 +87,17 @@ struct CountVehiclesInRulesComponent final : IComponent, PoolEventHandler<IVehic
 
 	void free() override
 	{
+		// Deletes the component.
 		delete this;
 	}
 
-	ICore* core = nullptr;
-	IVehiclesComponent* vehicles = nullptr;
+	void reset() override
+	{
+		// Resets data when the mode changes.
+	}
 };
 
 COMPONENT_ENTRY_POINT()
 {
-	return new CountVehiclesInRulesComponent();
+	return new BasicComponent();
 }
