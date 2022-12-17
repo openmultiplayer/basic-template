@@ -5,7 +5,19 @@ class BasicTemplate final : public IComponent, public PoolEventHandler<IVehicle>
 {
 private:
 	ICore* core_ = nullptr;
-	IVehiclesComponent* vehicles = nullptr;
+	IVehiclesComponent* vehicles_ = nullptr;
+
+	void updateVehicleCount()
+	{
+		for (INetwork* network : core_->getNetworks())
+		{
+			INetworkQueryExtension* query = queryExtension<INetworkQueryExtension>(network);
+			if (query)
+			{
+				query->addRule("vehicles", std::to_string(vehicles_->count()));
+			}
+		}
+	}
 
 public:
 	// https://open.mp/uid
@@ -31,57 +43,44 @@ public:
 	void onInit(IComponentList* components) override
 	{
 		// Cache components, add event handlers here.
-		vehicles = components->queryComponent<IVehiclesComponent>();
-		if (vehicles)
+		vehicles_ = components->queryComponent<IVehiclesComponent>();
+		if (vehicles_)
 		{
-			vehicles->getPoolEventDispatcher().addEventHandler(this);
+			vehicles_->getPoolEventDispatcher().addEventHandler(this);
 		}
 	}
 
 	void onReady() override
 	{
 		// Fire events here at earliest.
+		updateVehicleCount();
 	}
 
 	void onPoolEntryCreated(IVehicle& entry) override
 	{
-		for (INetwork* network : core_->getNetworks())
-		{
-			INetworkQueryExtension* query = queryExtension<INetworkQueryExtension>(network);
-			if (query)
-			{
-				query->addRule("vehicles", std::to_string(vehicles->count()));
-			}
-		}
+		updateVehicleCount();
 	}
 
 	void onPoolEntryDestroyed(IVehicle& entry) override
 	{
-		for (INetwork* network : core_->getNetworks())
-		{
-			INetworkQueryExtension* query = queryExtension<INetworkQueryExtension>(network);
-			if (query)
-			{
-				query->addRule("vehicles", std::to_string(vehicles->count()));
-			}
-		}
+		updateVehicleCount();
 	}
 
 	void onFree(IComponent* component) override
 	{
-		// Invalidate vehicles pointer so it can't be used past this point.
-		if (component == vehicles)
+		// Invalidate vehicles_ pointer so it can't be used past this point.
+		if (component == vehicles_)
 		{
-			vehicles = nullptr;
+			vehicles_ = nullptr;
 		}
 	}
 
 	~BasicTemplate()
 	{
 		// Clean up what you did above.
-		if (vehicles)
+		if (vehicles_)
 		{
-			vehicles->getPoolEventDispatcher().removeEventHandler(this);
+			vehicles_->getPoolEventDispatcher().removeEventHandler(this);
 		}
 	}
 
