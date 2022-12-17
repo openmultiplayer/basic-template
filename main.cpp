@@ -1,7 +1,7 @@
 #include <sdk.hpp>
 #include <Server/Components/Vehicles/vehicles.hpp>
 
-struct BasicTemplate final : IComponent, PoolEventHandler<IVehicle>
+class BasicTemplate final : public IComponent, public PoolEventHandler<IVehicle>
 {
 private:
 	ICore* core_ = nullptr;
