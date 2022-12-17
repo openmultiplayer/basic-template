@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
-project(test-component LANGUAGES C CXX VERSION 0.0.1)
+project(basic-component LANGUAGES C CXX VERSION 0.0.1)
 
 # http://blog.audio-tk.com/2015/09/01/sorting-source-files-and-projects-in-folders-with-cmake-and-visual-studioxcode/
 # https://github.com/TheLartians/GroupSourcesByFolder.cmake
