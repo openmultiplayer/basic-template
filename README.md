@@ -1,5 +1,5 @@
- open.mp Basic Compnent Template
-=================================
+ open.mp Basic Component Template
+==================================
 
 This is a simple component start point template.  It demonstrates a few uses of the SDK such as listening to vehicle creation events and calling methods in other components (mainly the query component), and these abilities can be built upon almost infinitely.  The default code counts the number of vehicles in the server and displays that in the server browser.
 
