@@ -6,13 +6,22 @@
  *  The original code is copyright (c) 2022, open.mp team and contributors.
  */
 
+// Required for most of open.mp.
 #include <sdk.hpp>
+
+// Include the vehicle component information.
 #include <Server/Components/Vehicles/vehicles.hpp>
 
+// This should use an abstract interface if it is to be passed to other components.  Like the files
+// in `<Server/Components/>` you would share only this base class and keep the implementation
+// private.
 class BasicTemplate final : public IComponent, public PoolEventHandler<IVehicle>
 {
 private:
+	// Hold a reference to the main server core.
 	ICore* core_ = nullptr;
+	
+	// Hold a reference to the vehicle component so methods in it can be called.
 	IVehiclesComponent* vehicles_ = nullptr;
 
 	void updateVehicleCount()
@@ -28,9 +37,31 @@ private:
 	}
 
 public:
-	// https://open.mp/uid
+	// Visit https://open.mp/uid to generate a new unique ID.
 	PROVIDE_UID(/* UID GOES HERE */);
 
+	// When this component is destroyed we need to tell any linked components this it is gone.
+	~BasicTemplate()
+	{
+		// Clean up what you did above.
+		if (vehicles_)
+		{
+			vehicles_->getPoolEventDispatcher().removeEventHandler(this);
+		}
+	}
+
+	// Implement the vehicle pool listener API.
+	void onPoolEntryCreated(IVehicle& entry) override
+	{
+		updateVehicleCount();
+	}
+
+	void onPoolEntryDestroyed(IVehicle& entry) override
+	{
+		updateVehicleCount();
+	}
+	
+	// Implement the main component API.
 	StringView componentName() const override
 	{
 		return "Basic Template";
@@ -45,7 +76,7 @@ public:
 	{
 		// Cache core, player pool here
 		core_ = c;
-		c->printLn("Basic component template loaded.");
+		core_->printLn("Basic component template loaded.");
 	}
 
 	void onInit(IComponentList* components) override
@@ -64,31 +95,12 @@ public:
 		updateVehicleCount();
 	}
 
-	void onPoolEntryCreated(IVehicle& entry) override
-	{
-		updateVehicleCount();
-	}
-
-	void onPoolEntryDestroyed(IVehicle& entry) override
-	{
-		updateVehicleCount();
-	}
-
 	void onFree(IComponent* component) override
 	{
 		// Invalidate vehicles_ pointer so it can't be used past this point.
 		if (component == vehicles_)
 		{
 			vehicles_ = nullptr;
-		}
-	}
-
-	~BasicTemplate()
-	{
-		// Clean up what you did above.
-		if (vehicles_)
-		{
-			vehicles_->getPoolEventDispatcher().removeEventHandler(this);
 		}
 	}
 
@@ -104,6 +116,7 @@ public:
 	}
 };
 
+// Automatically called when the compiled binary is loaded.
 COMPONENT_ENTRY_POINT()
 {
 	return new BasicTemplate();
