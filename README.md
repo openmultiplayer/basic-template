@@ -77,7 +77,12 @@ sudo chown 1000 conan
 Instead you run the script as root, and target a specific distro:
 
 ```bash
-UBUNTU_VERSION=18.04 sudo .\build.sh
+sudo ./build.sh -u 22.04
+```
+
+For more information about parameters that can you pass, run:
+```bash
+./build.sh -h|--help
 ```
 
 The output is in `docker/build/`
