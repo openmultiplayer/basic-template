@@ -1,25 +1,87 @@
 #!/bin/bash
 
+# Available options:
+
+# -c|--config <config> - Available configs: Debug, [RelWithDebInfo], Release
+# -s|--shared <shared> - Available options: [true], false
+# -u|--ubuntu <version> - Available options: 18.04, [20.04], 22.04
+# -t|--tools <tools> - Available options: true, [false]
+# -S|--server <server> - Available options: [true], false
+
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    case $key in
+        -c|--config)
+            config="$2"
+            shift
+            shift
+            ;;
+        -s|--shared)
+            build_shared="$2"
+            shift
+            shift
+            ;;
+        -u|--ubuntu)
+            ubuntu_version="$2"
+            shift
+            shift
+            ;;
+        -t|--tools)
+            build_tools="$2"
+            shift
+            shift
+            ;;
+        -S|--server)
+            build_server="$2"
+            shift
+            shift
+            ;;
+        -h|--help)
+            echo "Available options:"
+            echo ""
+            echo "-c|--config <config> - Available configs: Debug, [RelWithDebInfo], Release"
+            echo "-s|--shared <shared> - Available options: [true], false"
+            echo "-u|--ubuntu <version> - Available options: 18.04, [20.04], 22.04"
+            echo "-t|--tools <tools> - Available options: true, [false]"
+            echo "-S|--server <server> - Available options: [true], false"
+            exit 0
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
 # Available configs: Debug, [RelWithDebInfo], Release
-[[ -z "$CONFIG" ]] \
-&& config=RelWithDebInfo \
-|| config="$CONFIG"
-# Available versions: 18.04, [20.04], 22.04
-[[ -z "$UBUNTU_VERSION" ]] \
-&& ubuntu_version=20.04 \
-|| ubuntu_version="$UBUNTU_VERSION"
+
+if [[ -z "${config}" ]]; then
+    config="RelWithDebInfo"
+fi
+
+# Available options: 18.04, [20.04], 22.04
+
+if [[ -z "${ubuntu_version}" ]]; then
+    ubuntu_version="20.04"
+fi
+
 # Available options: [true], false
-[[ -z "$BUILD_SHARED" ]] \
-&& build_shared=1 \
-|| build_shared="$BUILD_SHARED"
+
+if [[ -z "${build_shared}" ]]; then
+    build_shared=1
+fi
+
 # Available options: [true], false
-[[ -z "$BUILD_SERVER" ]] \
-&& build_server=1 \
-|| build_server="$BUILD_SERVER"
+
+if [[ -z "${build_server}" ]]; then
+    build_server=1
+fi
+
 # Available options: true, [false]
-[[ -z "$BUILD_TOOLS" ]] \
-&& build_tools=0 \
-|| build_tools="$BUILD_TOOLS"
+
+if [[ -z "${build_tools}" ]]; then
+    build_tools=0
+fi
+
 
 docker build \
     -t open.mp/build:ubuntu-${ubuntu_version} \
